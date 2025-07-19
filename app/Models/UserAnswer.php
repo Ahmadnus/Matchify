@@ -7,6 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserAnswer extends Model
 {
-    /** @use HasFactory<\Database\Factories\UserAnswerFactory> */
-    use HasFactory;
+
+
+    protected $fillable = [
+        'user_id',
+        'question_id',
+        'answer',
+    ];
+
+    // العلاقة مع المستخدم
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    public function question()
+    {
+        return $this->belongsTo(Question::class);
+    }
+
 }

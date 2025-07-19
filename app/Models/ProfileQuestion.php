@@ -9,4 +9,6 @@ class ProfileQuestion extends Model
 {
     /** @use HasFactory<\Database\Factories\ProfileQuestionFactory> */
     use HasFactory;
+    // العلاقة مع السؤال
+
 }

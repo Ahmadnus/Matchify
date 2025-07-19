@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreUserAnswerRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class StoreUserAnswerRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -19,10 +20,18 @@ class StoreUserAnswerRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'user_id' => Auth::id(),
+        ]);
+    }
     public function rules(): array
     {
         return [
-            //
+            'user_id' => 'required|exists:users,id',
+            'question_id' => 'required|exists:questions,id',
+            'answer' => 'required|string|min:1'
         ];
     }
 }
