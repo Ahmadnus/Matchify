@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FriendController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\PeopleController;
 use App\Http\Controllers\UserAnswerController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -42,3 +43,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/friends/accepted', [FriendController::class, 'getAcceptedFriends']);
     Route::get('/friends/accepted/ids', [FriendController::class, 'getAcceptedFriendIds']);
 });
+Route::post('/people', [PeopleController::class, 'index']);
+Route::post('/update-location', [PeopleController::class, 'updateLocation'])->middleware('auth:sanctum');

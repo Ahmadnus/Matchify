@@ -38,7 +38,7 @@ class UserAnswerController extends Controller
             $data = $this->userAnswerService->create($request->all());
             return $this->successResponse('Answer saved successfully', $data, 201);
         } catch (\Throwable $e) {
-            \Log::error($e);
+            Log::error($e);
             return $this->errorResponse('Failed to save answer', 500);
         }
     }

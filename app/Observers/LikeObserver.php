@@ -11,7 +11,7 @@ use App\Models\Like;
     public function updated(Like $like)
     {
         if ($like->status === 'accepted') {
-            // تحقق إذا العلاقة موجودة مسبقًا
+
             $exists = Friend::where(function ($q) use ($like) {
                 $q->where('user_id', $like->sender_id)
                   ->where('friend_id', $like->receiver_id);
@@ -31,11 +31,11 @@ use App\Models\Like;
                 ]);
             }
 
-            $like->delete(); // حذف طلب الصداقة
+            $like->delete();
         }
 
         if ($like->status === 'rejected') {
-            $like->delete(); // فقط حذف عند الرفض
+            $like->delete();
         }
     }
 
