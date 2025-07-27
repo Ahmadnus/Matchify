@@ -23,6 +23,11 @@ class PeopleService
         $gender   = $filters['gender'] ?? null;
         $minAge   = $filters['min_age'] ?? null;
         $maxAge   = $filters['max_age'] ?? null;
+        $religion = $filters['religion'] ?? null;
+
+        // 🔹 استبعاد البلوكات
+        $blockedUserIds = \App\Models\Block::where('blocker_id', $userId)->pluck('blocked_id');
+        $blockedMeIds   = \App\Models\Block::where('blocked_id', $userId)->pluck('blocker_id');
 
         $query = User::select('*')
             ->selectRaw("
@@ -37,6 +42,8 @@ class PeopleService
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->where('id', '!=', $userId)
+            ->whereNotIn('id', $blockedUserIds)   // 🔹 المستخدمين الذين قمت بعمل بلوك لهم
+            ->whereNotIn('id', $blockedMeIds)     // 🔹 المستخدمين الذين عملوا لك بلوك
             ->having('distance', '<', $distance);
 
         if ($gender) {
@@ -53,6 +60,9 @@ class PeopleService
             $query->whereDate('date_of_birth', '>=', $minBirthDate);
         }
 
+        if (!is_null($religion)) {
+            $query->where('religion', $religion);
+        }
+
         return $query->get();
-    }
-}
+    }}

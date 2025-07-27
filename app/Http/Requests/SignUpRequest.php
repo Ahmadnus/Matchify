@@ -26,7 +26,7 @@ class SignUpRequest extends FormRequest
             'email' => ['required', 'email', 'unique:users,email', 'max:255'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
             'gender' => ['required', 'in:male,female,other'], // أو اختار القيم اللي تناسبك
-            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'], // 2 ميجا كحد أقصى
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'], // 2 ميجا كحد أقصى
         ];
     }
 }

@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BlockController;
 use App\Http\Controllers\FriendController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PeopleController;
 use App\Http\Controllers\UserAnswerController;
 use Illuminate\Http\Request;
@@ -45,3 +47,25 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::post('/people', [PeopleController::class, 'index']);
 Route::post('/update-location', [PeopleController::class, 'updateLocation'])->middleware('auth:sanctum');
+
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    // إنشاء أو جلب محادثة بين مستخدمين
+    Route::post('/chats', [MessageController::class, 'createOrGet']);
+
+    // جلب كل المحادثات الخاصة بالمستخدم
+    Route::get('/chats', [MessageController::class, 'indexx']);
+
+    // جلب الرسائل لمحادثة معينة
+    Route::get('/chats/{chat}/messages', [MessageController::class, 'index']);
+
+    // إرسال رسالة
+    Route::post('/messages/{chat}', [MessageController::class, 'send']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/block', [BlockController::class, 'block']);
+    Route::post('/unblock', [BlockController::class, 'unblock']);
+    Route::get('/blocked-users', [BlockController::class, 'blockedUsers']);
+});

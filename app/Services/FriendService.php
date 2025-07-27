@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Block;
 use App\Models\Friend;
 
     /**
@@ -11,19 +12,26 @@ use App\Models\Friend;
     {
         public function getAcceptedFriends($userId)
         {
-            return Friend::where('user_id', $userId)
+            $blockedUserIds = Block::where('blocker_id', $userId)->pluck('blocked_id')->toArray();
+            $blockedMeIds   = Block::where('blocked_id', $userId)->pluck('blocker_id')->toArray();
 
-                         ->with('friend') // تأكد إنو عامل العلاقة في الموديل
+            return Friend::where('user_id', $userId)
+                         ->whereNotIn('friend_id', $blockedUserIds)
+                         ->whereNotIn('friend_id', $blockedMeIds)
+                         ->with('friend')
                          ->get()
                          ->pluck('friend');
         }
 
         public function getAcceptedFriendIds($userId)
         {
-            return Friend::where('user_id', $userId)
+            $blockedUserIds = Block::where('blocker_id', $userId)->pluck('blocked_id')->toArray();
+            $blockedMeIds   = Block::where('blocked_id', $userId)->pluck('blocker_id')->toArray();
 
+            return Friend::where('user_id', $userId)
+                         ->whereNotIn('friend_id', $blockedUserIds)
+                         ->whereNotIn('friend_id', $blockedMeIds)
                          ->pluck('friend_id')
                          ->toArray();
         }
     }
-

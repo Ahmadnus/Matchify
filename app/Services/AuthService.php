@@ -12,19 +12,21 @@ class AuthService
 {
     public function register(array $data)
     {
+        $user = User::create([
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'gender'   => $data['gender'],
+            'religion' => $data['religion'] ?? null,
+            'password' => Hash::make($data['password']),
+        ]);
 
-$data = User::create([
-    'name' => $data['name'],
-    'email' => $data['email'],
-    'gender' => $data['gender'],
+        // إذا تم رفع الصورة (avatar)
+        if (isset($data['avatar']) && $data['avatar'] instanceof \Illuminate\Http\UploadedFile) {
+            $user->addMedia($data['avatar'])->toMediaCollection('avatar');
+        }
 
-    'password' => Hash::make($data['password']),
-]);
-
-        return $data;
+        return $user;
     }
-
-
 
     public function login(array $credentials)
     {

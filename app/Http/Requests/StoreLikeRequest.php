@@ -35,13 +35,27 @@ class StoreLikeRequest extends FormRequest
         $senderId = Auth::id();
         $receiverId = $this->input('receiver_id');
 
-        $exists = \App\Models\Like::where('sender_id', $senderId)
+        // تحقق من وجود طلب إعجاب معلق مسبقًا
+        $likeExists = \App\Models\Like::where('sender_id', $senderId)
             ->where('receiver_id', $receiverId)
             ->where('status', 'pending')
             ->exists();
 
-        if ($exists) {
-            $validator->errors()->add('receiver_id', 'You have already sent a pending friend request to this user.');
+        if ($likeExists) {
+            $validator->errors()->add('receiver_id', 'You have already sent a pending like request to this user.');
+        }
+
+        // تحقق من أن المستقبل موجود في جدول الأصدقاء (مثلاً شرط إضافي حسب منطقك)
+        $alreadyFriend = \App\Models\Friend::where(function ($query) use ($senderId, $receiverId) {
+                $query->where('user_id', $senderId)->where('friend_id', $receiverId);
+            })
+            ->orWhere(function ($query) use ($senderId, $receiverId) {
+                $query->where('user_id', $receiverId)->where('friend_id', $senderId);
+            })
+            ->exists();
+
+        if ($alreadyFriend) {
+            $validator->errors()->add('receiver_id', 'You are already friends with this user.');
         }
     });
 }

@@ -5,62 +5,52 @@ namespace App\Http\Controllers;
 use App\Models\Block;
 use App\Http\Requests\StoreBlockRequest;
 use App\Http\Requests\UpdateBlockRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BlockController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+    public function block(Request $request)
     {
-        //
+        $request->validate([
+            'blocked_id' => 'required|exists:users,id|not_in:' . Auth::id(),
+        ]);
+
+        $alreadyBlocked = Block::where('blocker_id', Auth::id())
+            ->where('blocked_id', $request->blocked_id)
+            ->exists();
+
+        if ($alreadyBlocked) {
+            return response()->json(['message' => 'User already blocked'], 409);
+        }
+
+        Block::create([
+            'blocker_id' => Auth::id(),
+            'blocked_id' => $request->blocked_id,
+        ]);
+
+        return response()->json(['message' => 'User blocked successfully']);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function unblock(Request $request)
     {
-        //
+        $request->validate([
+            'blocked_id' => 'required|exists:users,id',
+        ]);
+
+        Block::where('blocker_id', Auth::id())
+            ->where('blocked_id', $request->blocked_id)
+            ->delete();
+
+        return response()->json(['message' => 'User unblocked']);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreBlockRequest $request)
+    public function blockedUsers()
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Block $block)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Block $block)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateBlockRequest $request, Block $block)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Block $block)
-    {
-        //
+        $blocked = Auth::user()->blockedUsers()->with('blocked')->get();
+        return response()->json([
+            'data' => $blocked->pluck('blocked'),
+        ]);
     }
 }
