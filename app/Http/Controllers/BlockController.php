@@ -2,55 +2,46 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BlockUserRequest;
 use App\Models\Block;
 use App\Http\Requests\StoreBlockRequest;
+use App\Http\Requests\UnblockUserRequest;
 use App\Http\Requests\UpdateBlockRequest;
+use App\Services\BlockService;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
 class BlockController extends Controller
 {
+    use ApiResponse;
 
-    public function block(Request $request)
+    protected BlockService $blockService;
+
+    public function __construct(BlockService $blockService)
     {
-        $request->validate([
-            'blocked_id' => 'required|exists:users,id|not_in:' . Auth::id(),
-        ]);
-
-        $alreadyBlocked = Block::where('blocker_id', Auth::id())
-            ->where('blocked_id', $request->blocked_id)
-            ->exists();
-
-        if ($alreadyBlocked) {
-            return response()->json(['message' => 'User already blocked'], 409);
-        }
-
-        Block::create([
-            'blocker_id' => Auth::id(),
-            'blocked_id' => $request->blocked_id,
-        ]);
-
-        return response()->json(['message' => 'User blocked successfully']);
+        $this->blockService = $blockService;
     }
 
-    public function unblock(Request $request)
+    public function block(BlockUserRequest $request)
     {
-        $request->validate([
-            'blocked_id' => 'required|exists:users,id',
-        ]);
+        $result = $this->blockService->blockUser($request->blocked_id);
 
-        Block::where('blocker_id', Auth::id())
-            ->where('blocked_id', $request->blocked_id)
-            ->delete();
+        if (!$result['status']) {
+            return $this->errorResponse($result['message'], 409);
+        }
 
-        return response()->json(['message' => 'User unblocked']);
+        return $this->successResponse($result['message']);
+    }
+
+    public function unblock(UnblockUserRequest $request)
+    {
+        $this->blockService->unblockUser($request->blocked_id);
+        return $this->successResponse('User unblocked');
     }
 
     public function blockedUsers()
     {
-        $blocked = Auth::user()->blockedUsers()->with('blocked')->get();
-        return response()->json([
-            'data' => $blocked->pluck('blocked'),
-        ]);
+        $blocked = $this->blockService->getBlockedUsers();
+        return $this->successResponse('Blocked users retrieved successfully', $blocked);
     }
 }

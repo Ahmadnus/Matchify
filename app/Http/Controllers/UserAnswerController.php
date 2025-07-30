@@ -69,16 +69,10 @@ public function showUserAnswers($userAnswer)
 {
     try {
         $answers = $this->userAnswerService->getAnswersByUser($userAnswer);
-
-        return response()->json([
-            'message' => 'User answers retrieved successfully.',
-            'data' => $answers,
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Could not retrieve user answers.',
-            'error' => $e->getMessage(),
-        ], 404);
+        return $this->successResponse('User answers retrieved successfully.', $answers);
+    } catch (\Throwable $e) {
+        Log::error($e);
+        return $this->errorResponse('Could not retrieve user answers', 500);
     }
 }
 }
